@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Quiz Question</title>
+   <style>
+    ul,
+    ul li {
+        list-style-type: none !important;
+        padding: 0;
+        margin: 0;
+    }
+
+    li {
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+    }
+
+    input[type="checkbox"] {
+        margin-right: 5px;
+    }
+
+    /* Hide the correct answer initially */
+    #correctAnswer {
+        display: none;
+    }
+    </style>
+</head>
+<body>
+   <h2>{{ chapter_mapping[question['section']] }}</h2>
+   <h3>{{ question['id'] }}</h3>
+   <h3>{{ question['question'] }}</h3>
+   <ul>
+        {% for option_num in range(question['options']|length) %}
+            {% set option = question['options'][option_num] %}
+            {% if option %}
+                <li>
+                    <input type="checkbox" id="option{{ loop.index0 }}" name="options" value="{{ loop.index0 }}">
+                    <label for="option{{ loop.index0 }}">{{ loop.index0|index_to_letter }}: {{ option }}</label>
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+
+   <button id="checkAnswerButton">Check Answer</button>
+   <a href="/quiz">Next Question</a>
+
+   <!-- Display the correct answer text -->
+   <div id="correctAnswer">
+        <h3>Correct Answer:</h3>
+        <h4>{{ question['correct_answer']|join(' ') }}.</h4>  
+            <h4>{{ question['block_text']|join('') }}</h4> 
+    </div>
+
+
+    <script>
+        document.getElementById('checkAnswerButton').addEventListener('click', function() {
+            // Logic to check if the selected options are correct
+            var selectedOptions = document.querySelectorAll('input[name="options"]:checked');
+            var userAnswer = Array.from(selectedOptions).map(option => indexToLetter(parseInt(option.value)));
+    
+            // Retrieve the correct answer indices from the Flask data
+            var correctAnswerIndices = {{ question['correct_answer_indices'] | tojson | safe }};
+    
+            // Generate the correct answer array dynamically
+            var correctAnswer = correctAnswerIndices.map(indexToLetter);
+    
+            if (arraysEqual(userAnswer, correctAnswer)) {
+                alert('Correct!');
+            } else {
+                alert('Incorrect. Please try again.');
+            }
+    
+            // Show the correct answer text
+            document.getElementById('correctAnswer').style.display = 'block';
+        });
+    
+        // Helper function to convert numeric index to letter (1 -> A, 2 -> B, etc.)
+        function indexToLetter(index) {
+            return String.fromCharCode(65 + index - 1);
+        }
+    
+        // Helper function to check if two arrays are equal
+        function arraysEqual(arr1, arr2) {
+            return JSON.stringify(arr1) === JSON.stringify(arr2);
+        }
+    </script>
+</body>
+</html>
