@@ -19,7 +19,7 @@ def load_quiz_data(file_path):
     quiz_data = []
     for row_questions, row_answers in zip(ws_questions.iter_rows(min_row=2, values_only=True), ws_answers.iter_rows(min_row=2, values_only=True)):
         section, id, question, *options = row_questions
-        correct_answer_indices = [index for index, value in enumerate(row_answers[1:], start=1) if value] 
+        correct_answer_indices = [index for index, value in enumerate(row_answers[1:], start=0) if value]
         correct_answer = [index_to_letter(index) for index in correct_answer_indices]
         block_text = list(row_answers[0])
         quiz_data.append({'section': section, 'id': id, 'question': question, 'options': options, 'correct_answer': correct_answer, 'correct_answer_indices': correct_answer_indices, 'block_text': block_text})
@@ -33,17 +33,17 @@ def index():
 
 @app.route('/quiz')
 def quiz():
-    quiz_data = load_quiz_data('questions.xlsx')
+    quiz_data = load_quiz_data('quiz.xlsx')
     random_question = random.choice(quiz_data)
-    
+
     chapter_mapping = {
-        'C01': 'Chapter 01',
-        'C02': 'Chapter 02',
-        'C03': 'Chapter 03',
-        'C04': 'Chapter 04',
-        'C05': 'Chapter 05',
-        'C06': 'Chapter 06',
-        'C07': 'Chapter 07',
+        'C01': 'Chapter 01 - Networking Fundamentals',
+        'C02': 'Chapter 02 - Network Implementations',
+        'C03': 'Chapter 03 - Network Operations',
+        'C04': 'Chapter 04 - Network Security',
+        'C05': 'Chapter 05 - Network Troubleshooting',
+        'C06': 'Chapter 06 - Practice Exam 1',
+        'C07': 'Chapter 07 - Practice Exam 2',
     }
     id = random_question['id']
     return render_template('quiz.html', id=id, question=random_question, chapter_mapping=chapter_mapping)
